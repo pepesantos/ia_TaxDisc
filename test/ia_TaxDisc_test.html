@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Test ia_TaxDisc QUnit</title>
+  <link rel="stylesheet" href="plugins/qunit-1.18.0.css" />
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <script src="./plugins/qunit-1.18.0.js"></script>
+  <script src="./plugins/blanket.min.js"></script>
+  <script src="./plugins/qunit-assert-close.js"></script>
+  <script src="../ia_TaxDisc.js" data-cover data-cover-flags="branchTracking"></script>
+  <script>
+    function displayTestData(d) {
+        var ret='';
+        for(var index in d) {
+            ret += index + " : " + d[index] + ",";
+        }
+        return "{"+ret+"}";
+    }
+
+    QUnit.module('Module ia_TaxDisc');
+
+    QUnit.test( "Discounts", function( assert ) {
+      var maxDiference=0.01;
+      var
+        discount = new ia_TaxDisc(0.1,2,false),
+        discount_cases =[
+           {"before":100,"per":0.1,"value":10,"after":90},
+
+        ],
+        discount_cases_len = discount_cases.length,
+        disc,
+        d
+      ;
+      for(var iTestDisc=0;iTestDisc<discount_cases_len;iTestDisc++) {
+        d = discount_cases[iTestDisc];
+
+        assert.propEqual( discount.breakdown(d.before), d, "discount.breakdown("+d.before+") // 10% discount for "+d.before );
+        assert.propEqual( discount.breakdown(d),    d, "discount.breakdown("+displayTestData(d)+") // as object 10% discount for "+d.before );
+
+        assert.propEqual( discount.deduce(d.before), d, "discount.deduce("+d.before+")" );
+        assert.propEqual( discount.deduce(d.before,d.value), d, "discount.deduce("+d.before+","+d.value+")" );
+
+        assert.propEqual( discount.deduce(d.before,d.value,d.after), d, "discount.deduce("+d.before+","+d.value+","+d.after+")" );
+        assert.propEqual( discount.deduce(d.before,null,d.after),    d, "discount.deduce("+d.before+",null,"+d.after+")" );
+        assert.propEqual( discount.deduce('',d.value),               d, "discount.deduce(null,"+d.value+")" );
+        assert.propEqual( discount.deduce(null,d.value,d.after),     d, "discount.deduce(null,"+d.value+","+d.after+")" );
+        assert.propEqual( discount.deduce(null,null,d.after),        d, "discount.deduce(null,null,"+d.after+")" );
+
+        assert.propEqual( discount.deduce(d), d, "discount.deduce("+displayTestData(d)+")" );
+
+      }
+      assert.propEqual( discount.deduce(null,null,null), {"before":null,"per":0.1,"value":null,"after":null}, "discount.deduce(null,null,null) // all empty" );
+
+      var use_defaults_d = new ia_TaxDisc(null,null,-1);
+      assert.propEqual( use_defaults_d.deduce(d), d, "use_defaults_d.deduce("+displayTestData(d)+") no markup" );
+      assert.propEqual( use_defaults_d.deduce(100,null,null,0.25), {"before":100,"per":0.25,"value":25,"after":75}, "use_defaults_d.deduce(100,null,null,0.25) no markup" );
+
+      var perString = new ia_TaxDisc('10%',2,false,2);
+      assert.propEqual( perString.deduce(250,null,null,'10%'),{before:250,per:0.1,value:25,after:225},'percentage as 10%' );
+    });
+
+    QUnit.test( "Markup or tax", function( assert ) {
+
+      var
+        vat = new ia_TaxDisc(0.15,2,true),
+        tax_cases =[
+            {before:200,per:0.15,value:30,after:230},
+        ],
+        tax_cases_len = tax_cases.length,
+        t
+      ;
+      for(var iTest=0;iTest<tax_cases_len;iTest++) {
+        t = tax_cases[iTest];
+
+        assert.propEqual( vat.breakdown(t.before), t, "tax.breakdown("+t.before+")" );
+        assert.propEqual( vat.breakdown(t), t, "tax.breakdown("+displayTestData(t)+")" );
+
+        assert.propEqual( vat.deduce(t.before), t, "tax.deduce("+t.before+")" );
+        assert.propEqual( vat.deduce(t.before,t.value), t, "tax.deduce("+t.before+","+t.value+")" );
+        assert.propEqual( vat.deduce(t.before,t.value,t.after), t, "tax.deduce("+t.before+","+t.value+","+t.after+")" );
+        assert.propEqual( vat.deduce(t.before,null,t.after), t, "tax.deduce("+t.before+","+t.value+","+t.after+")" );
+        assert.propEqual( vat.deduce(null,t.value), t, "tax.deduce(null,"+t.value+")" );
+        assert.propEqual( vat.deduce(null,t.value,t.after), t, "tax.deduce(null,"+t.value+","+t.after+")" );
+        assert.propEqual( vat.deduce(null,null,t.after), t, "tax.deduce(null,null,"+t.after+")" );
+
+        assert.propEqual( vat.deduce(t), t, "tax.deduce("+displayTestData(t)+")" );
+
+      }
+      assert.propEqual( vat.breakdown(150,'10%'),{before:150,per:0.1,value:15,after:165},'percentage as 10%' );
+      var use_defaults = new ia_TaxDisc();
+      assert.propEqual( use_defaults.deduce(t), t, "use_defaults.deduce("+displayTestData(t)+") no markup" );
+      assert.propEqual( use_defaults.deduce(100,null,null,0.25), {"before":100,"per":0.25,"value":25,"after":125},
+                                             "use_defaults.deduce(100,null,null,0.25) no markup" );
+      var perString = new ia_TaxDisc('10%',2,true,2);
+      assert.propEqual( perString.deduce(250,null,null,'10%'),{before:250,per:0.1,value:25,after:275},'percentage as 10%' );
+    });
+  </script>
+</body>
+</html>

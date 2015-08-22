@@ -1,0 +1,240 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+	<title>ia_TaxDisc, example</title>
+    <style>
+    .fieldlabel {margin:2px;text-align:left;position:relative;margin-right:12px;}
+    span.label_input{display: inline-block;color:darkblue;vertical-align:middle;}
+    span.label_input_top label {display: block;position: relative;}
+    </style>
+    <script src="../ia_TaxDisc.js"></script>
+    <script defer="defer">
+
+    function vat_breakdown() {
+        var vat = new ia_TaxDisc('16%',2,true),
+            result = vat.breakdown(document.getElementById('vat_before_amount').value);
+        console.log('vat.breakdown('+document.getElementById('vat_before_amount').value+')',result);
+        document.getElementById('vat_result_bkdown').style.display = 'inline';
+        document.getElementById('vat_breakdown_result').innerHTML = printr(result);
+    }
+
+    function vat_deduce() {
+        var vat = new ia_TaxDisc(0.16,2,true),
+            result = vat.deduce(document.getElementById('vat_before').value, document.getElementById('vat_amount').value,
+                document.getElementById('vat_total').value, document.getElementById('vat').value )
+            actual_call = 'vat.deduce(' + console_params('vat_before','vat_amount','vat_total','vat') + ')'
+            ;
+        console.log(actual_call,result);
+        document.getElementById('vat_result_deduce').style.display = 'inline';
+        document.getElementById('vat_deduce_result').innerHTML = actual_call + " \r\n// returns: " + printr(result);
+    }
+
+    function disc_breakdown() {
+        var disc = new ia_TaxDisc(0.1,2,false),
+            result = disc.breakdown(document.getElementById('disc_before_amount').value);
+        console.log('disc.breakdown('+document.getElementById('disc_before_amount').value+')',result);
+        document.getElementById('disc_result_bkdown').style.display = 'inline';
+        document.getElementById('disc_breakdown_result').innerHTML = printr(result);
+    }
+
+    function disc_deduce() {
+        var disc = new ia_TaxDisc('10%',2,false),
+            result = disc.deduce(document.getElementById('disc_before').value, document.getElementById('disc_amount').value,
+                document.getElementById('disc_total').value, document.getElementById('disc').value ),
+            actual_call = 'disc.deduce(' + console_params('disc_before','disc_amount','disc_total','disc')+')'
+            ;
+        console.log(actual_call, result);
+        document.getElementById('disc_result_deduce').style.display = 'inline';
+        document.getElementById('disc_deduce_result').innerHTML = actual_call + " \r\n// returns: " + printr(result);
+    }
+    // helper functions for demo
+    function console_params(b,v,a,p) {
+        var ret='';
+        if( document.getElementById(b).value != '' )
+            ret += 'before: ' + document.getElementById(b).value+',';
+        if( document.getElementById(v).value != '' )
+            ret += 'value: ' + document.getElementById(v).value+',';
+        if( document.getElementById(a).value != '' )
+            ret += 'after: ' + document.getElementById(a).value+',';
+        if( document.getElementById(p).value != '' )
+            ret += 'per: ' + document.getElementById(p).value+',';
+        return '{' + ret + '}';
+    }
+    function printr(o){
+        var ret='{';
+        for(var k in o)
+            ret += k+': '+o[k]+', ';
+        return ret+'}';
+    }
+
+    </script>
+
+</head>
+<body>
+<h1 style="text-align: center;">ia_TaxDisc example</h1>
+Include the script<br />
+<code>
+&lt;script src="../ia_TaxDisc.js"&gt;&lt;/script&gt;
+</code>
+<br />&nbsp;
+<fieldset>
+<legend>Tax or Markup</legend>
+    <code>
+        var vat = new ia_TaxDisc(0.16,2,true,2); // default tax 16%, round amounts to 2 decimals, true=it's markup, tax percent decimals 2
+    </code>
+
+    <fieldset><legend>Deduce </legend>Type some of the values
+        <div style="margin-bottom: 2px;">
+            <div class="fieldlabel" style="float: left;">
+                <span class="label_input label_input_top">
+                    <label for="vat_before" >Amount before tax</label>
+                    <input type="text" name="vat_before" id="vat_before" value="" />
+                </span>
+            </div>
+
+            <div class="fieldlabel" style="float: left;">
+                <span class="label_input label_input_top">
+                    <label for="vat" >VAT %</label>
+                    <input type="text" name="vat" id="vat" value="" />
+                    <br /><i style="font-size: smaller;font-weight:100;">ie: 0.15 or 15% or blank<br />defaults to 16%</i>
+                </span>
+            </div>
+
+            <div class="fieldlabel" style="float: left;">
+                <span class="label_input label_input_top">
+                    <label for="vat_amount" >VAT</label>
+                    <input type="text" name="vat_amount" id="vat_amount" value="" />
+                </span>
+            </div>
+
+            <div class="fieldlabel" style="float: left;">
+                <span class="label_input label_input_top">
+                    <label for="vat_total" >Amount + VAT</label>
+                    <input type="text" name="vat_total" id="vat_total" value="" />
+                </span>
+            </div>
+
+            <div class="fieldlabel" style="float: left;">
+                <span class="label_input label_input_top">
+                    <label for="vat_breakdown_button" >&nbsp;</label>
+                    <input type="button" id="vat_breakdown_button" value="Deduce missing" onclick="vat_deduce()" />
+                </span>
+            </div>
+        </div>
+        <div style="clear: both;"></div>
+<code style="white-space: pre;">
+var result = vat.deduce(document.getElementById('vat_before').value, document.getElementById('vat_amount').value,
+             document.getElementById('vat_total').value, document.getElementById('vat').value );
+<span id="vat_result_deduce" style="display: none;color:blue;"><span id="vat_deduce_result"></span></span>
+</code>
+    </fieldset>
+
+
+    <fieldset><legend>Breakdown</legend>
+        <div style="margin-bottom: 2px;">
+            <div class="fieldlabel" style="float: left;">
+                <span class="label_input label_input_top">
+                    <label for="vat_before_amount" >* Amount before tax</label>
+                    <input type="text" required="required" name="vat_before_amount" id="vat_before_amount" value="" />
+                </span>
+            </div>
+            <div class="fieldlabel" style="float: left;">
+                <span class="label_input label_input_top">
+                    <label for="vat_breakdown_button" >&nbsp;</label>
+                    <input type="button" id="vat_breakdown_button" value="Calculate" onclick="vat_breakdown()" />
+                </span>
+            </div>
+        </div>
+        <div style="clear: both;"></div>
+<code style="white-space: pre;">
+var result = vat.breakdown(document.getElementById('vat_before_amount').value );
+    <span id="vat_result_bkdown" style="display: none;color:blue;">// results = <span id="vat_breakdown_result"></span></span>
+</code>
+    </fieldset>
+
+
+
+</fieldset>
+
+
+<fieldset>
+<legend>Discount</legend>
+    <code>
+        var disc = new ia_TaxDisc('10%',2,<b>false</b>,2); // default discount 10%, round amounts to 2 decimals, false=it's discount, discount percent decimals 2
+    </code>
+
+    <fieldset><legend>Deduce</legend>Type some of the values
+        <div style="margin-bottom: 2px;">
+            <div class="fieldlabel" style="float: left;">
+                <span class="label_input label_input_top">
+                    <label for="disc_before" >Amount before discount</label>
+                    <input type="text" name="disc_before" id="disc_before" value="" />
+                </span>
+            </div>
+
+            <div class="fieldlabel" style="float: left;">
+                <span class="label_input label_input_top">
+                    <label for="disc" >disc %</label>
+                    <input type="text" name="disc" id="disc" value="" />
+                    <br /><i style="font-size: smaller;font-weight:100;">ie: 0.25 or 25% or blank<br />defaults to 10%</i>
+                </span>
+            </div>
+
+            <div class="fieldlabel" style="float: left;">
+                <span class="label_input label_input_top">
+                    <label for="disc_amount" >disc</label>
+                    <input type="text" name="disc_amount" id="disc_amount" value="" />
+                </span>
+            </div>
+
+            <div class="fieldlabel" style="float: left;">
+                <span class="label_input label_input_top">
+                    <label for="disc_total" >Amount - discount</label>
+                    <input type="text" name="disc_total" id="disc_total" value="" />
+                </span>
+            </div>
+
+            <div class="fieldlabel" style="float: left;">
+                <span class="label_input label_input_top">
+                    <label for="disc_breakdown_button" >&nbsp;</label>
+                    <input type="button" id="disc_breakdown_button" value="Deduce missing" onclick="disc_deduce()" />
+                </span>
+            </div>
+        </div>
+        <div style="clear: both;"></div>
+<code style="white-space: pre;">
+var result = disc.deduce(document.getElementById('disc_before').value, document.getElementById('disc_amount').value,
+             document.getElementById('disc_total').value, document.getElementById('disc').value );
+<span id="disc_result_deduce" style="display: none;color:blue;"><span id="disc_deduce_result"></span></span>
+</code>
+    </fieldset>
+
+    <fieldset><legend>Breakdown</legend>
+        <div style="margin-bottom: 2px;">
+            <div class="fieldlabel" style="float: left;">
+                <span class="label_input label_input_top">
+                    <label for="disc_before_amount" >* Amount before discount</label>
+                    <input type="text" required="required" name="disc_before_amount" id="disc_before_amount" value="" />
+                </span>
+            </div>
+            <div class="fieldlabel" style="float: left;">
+                <span class="label_input label_input_top">
+                    <label for="disc_breakdown_button" >&nbsp;</label>
+                    <input type="button" id="disc_breakdown_button" value="Calculate" onclick="disc_breakdown()" />
+                </span>
+            </div>
+        </div>
+        <div style="clear: both;"></div>
+<code style="white-space: pre;">
+var result = disc.breakdown(document.getElementById('disc_before_amount').value );
+    <span id="disc_result_bkdown" style="display: none;color:blue;">// results = <span id="disc_breakdown_result"></span></span>
+</code>
+    </fieldset>
+
+
+
+</fieldset>
+
+</body>
+</html>
